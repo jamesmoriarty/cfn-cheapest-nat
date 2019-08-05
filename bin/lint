@@ -1,0 +1,4 @@
+#/bin/sh
+
+pip3 install cfn-lint && \
+  cfn-lint --template cfn/stack.yml --region us-east-1 --include-experimental --format json

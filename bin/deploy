@@ -1,0 +1,15 @@
+#/bin/sh
+
+set -e
+set -u
+set -x
+
+aws cloudformation deploy \
+  --no-fail-on-empty-changeset \
+  --region ap-southeast-2 \
+  --capabilities CAPABILITY_NAMED_IAM \
+  --template-file cfn/stack.yml \
+  --stack-name $STACK_NAME \
+  --parameter-overrides \
+    PrivateRouteTables=$PRIVATE_ROUTE_TABLES \
+    PublicSubnets=$PUBLIC_SUBNETS
