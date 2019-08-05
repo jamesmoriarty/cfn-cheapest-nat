@@ -2,11 +2,11 @@
 
 The never ending quest to find the cheapest NAT solution for personal projects.
 
-|solution                           |network  |cost/hour|cost/month|
-|-----------------------------------|---------|---------|----------|
-|[NAT Gateway][1]                   |5-45 Gbps|0.045    |32.40     |
-|[NAT Instance (t3a.nano)][2]       |0-5  Gbps|0.0059   | 4.25     |
-|[NAT Instance (t3a.nano) (Spot)][2]|0-5  Gbps|0.0018*  | 1.30*    |
+|solution                           |network  |cost/hour**|cost/month**|
+|-----------------------------------|---------|-----------|------------|
+|[NAT Gateway][1]                   |5-45 Gbps|0.045      |32.40       |
+|[NAT Instance (t3a.nano)][2]       |0-5  Gbps|0.0059     | 4.25       |
+|[NAT Instance (t3a.nano) (Spot)][2]|0-5  Gbps|0.0018*    | 1.30*      |
 
 \* variable costs.
 
@@ -32,7 +32,7 @@ aws cloudformation deploy \
   --template-file cfn/vpc.yml \
   --stack-name examples-vpc \
   --parameter-overrides \
-    EnvironmentName=examples
+    EnvironmentName=Examples
 ```
 
 [1]: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
