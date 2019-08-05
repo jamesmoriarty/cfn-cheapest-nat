@@ -23,6 +23,21 @@ PUBLIC_SUBNETS=subnet-03ad595bb28ce7679,subnet-09f9df1d1d8a2c2c9 \
 
 ## Testing
 
+### speedtest-cli
+
+```
+./speedtest-cli
+Retrieving speedtest.net configuration...
+Testing from Amazon.com (13.211.165.98)...
+Retrieving speedtest.net server list...
+Selecting best server based on ping...
+Hosted by Telstra (Sydney) [1.01 km]: 2.611 ms
+Testing download speed................................................................................
+Download: 2651.82 Mbit/s
+Testing upload speed................................................................................................
+Upload: 2638.67 Mbit/s
+```
+
 ### Example VPC
 
 ```
