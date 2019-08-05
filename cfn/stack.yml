@@ -47,7 +47,18 @@ Resources:
           Action: sts:AssumeRole
       ManagedPolicyArns:
       - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
-      - arn:aws:iam::aws:policy/AmazonEC2FullAccess
+      Policies:
+      - PolicyName: ec2
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - 'ec2:ModifyInstanceAttribute'
+            - 'ec2:CreateRoute'
+            - 'ec2:ReplaceRoute'
+            Resource:
+            - '*'
 
   NATInstanceProfile:
     Type: AWS::IAM::InstanceProfile
