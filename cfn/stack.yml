@@ -33,6 +33,10 @@ Resources:
           - InstanceType: t3.nano
       MaxSize: '1'
       MinSize: '1'
+      Tags:
+        - Key: Name
+          PropagateAtLaunch: true
+          Value: !Join ['', [!Ref 'AWS::AccountId', '-', !Ref 'AWS::Region', '-', !Ref 'AWS::StackName']]
 
   NATInstanceRole:
     Type: AWS::IAM::Role
