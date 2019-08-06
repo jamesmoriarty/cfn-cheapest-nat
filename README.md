@@ -2,7 +2,7 @@
 
 [![build status][3]][4]
 
-The never ending quest to find the cheapest NAT solution for personal projects.
+The never ending quest to find the cheapest AWS VPC NAT solution for personal projects.
 
 |solution                           |network  |cost/hour**|cost/month**|
 |-----------------------------------|---------|-----------|------------|
