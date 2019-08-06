@@ -6,7 +6,7 @@ The never ending quest to find the cheapest AWS VPC NAT solution for personal pr
 
 |solution                           |network  |cost/hour**|cost/month**|
 |-----------------------------------|---------|-----------|------------|
-|[NAT Gateway][1]                   |5-45 Gbps|0.045      |32.40       |
+|[NAT Gateway][1]                   |5-45 Gbps|0.059      |42.48       |
 |[NAT Instance (t3a.nano)][2]       |0-5  Gbps|0.0059     | 4.25       |
 |[NAT Instance (t3a.nano) (spot)][2]|0-5  Gbps|0.0018*    | 1.30*      |
 
