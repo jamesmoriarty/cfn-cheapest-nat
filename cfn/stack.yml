@@ -4,8 +4,11 @@ Parameters:
   PrivateRouteTables:
     Type: String
 
+  PrivateSubnets:
+    Type: String
+
   PublicSubnets:
-    Type: String 
+    Type: String
 
 Mappings:
   RegionMap:
@@ -75,11 +78,28 @@ Resources:
         IamInstanceProfile: 
           Arn: !GetAtt NATInstanceProfile.Arn
         ImageId:
-          Fn::FindInMap:
+          !FindInMap
           - RegionMap
           - !Ref 'AWS::Region'
           - AMI
         InstanceType: t3.nano
+        NetworkInterfaces:
+          - DeviceIndex: 0
+            AssociatePublicIpAddress: true
+            SubnetId:
+              !Select
+              - 0
+              - !Split
+                - ','
+                - !Ref PublicSubnets
+          - DeviceIndex: 1
+            AssociatePublicIpAddress: false
+            SubnetId:
+              !Select
+              - 0
+              - !Split
+                - ','
+                - !Ref PrivateSubnets
         UserData:
           'Fn::Base64': !Sub
           - |
