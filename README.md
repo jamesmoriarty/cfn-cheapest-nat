@@ -40,18 +40,6 @@ Testing upload speed............................................................
 Upload: 2638.67 Mbit/s
 ```
 
-### Example VPC
-
-```
-aws cloudformation deploy \
-  --no-fail-on-empty-changeset \
-  --region ap-southeast-2 \
-  --template-file cfn/vpc.yml \
-  --stack-name examples-vpc \
-  --parameter-overrides \
-    EnvironmentName=Examples
-```
-
 [1]: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
 [2]: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_NAT_Instance.html
 [3]: https://codebuild.us-east-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiWVdkQTF5ekRUSm1FNjgxT0RsL0ZBanFER1dSRG1kQWI0VUNLS2NlS0EwZ0pjdmN5a1RVSGI5K2p5Ty9vZFVZZ2gxck1GOWM4bHJ3WC9VVzJhZDVieE9vPSIsIml2UGFyYW1ldGVyU3BlYyI6IlhoM1dkMGw4M3VFNXlZWU4iLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master
