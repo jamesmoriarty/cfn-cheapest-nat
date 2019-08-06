@@ -33,10 +33,14 @@ Resources:
           - InstanceType: t3.nano
       MaxSize: '1'
       MinSize: '1'
+      MetricsCollection:
+      - Granularity: 1Minute
+        Metrics:
+        - GroupInServiceInstances
       Tags:
-        - Key: Name
-          PropagateAtLaunch: true
-          Value: !Join ['', [!Ref 'AWS::AccountId', '-', !Ref 'AWS::Region', '-', !Ref 'AWS::StackName']]
+      - Key: Name
+        PropagateAtLaunch: true
+        Value: !Join ['', [!Ref 'AWS::AccountId', '-', !Ref 'AWS::Region', '-', !Ref 'AWS::StackName']]
 
   NATInstanceRole:
     Type: AWS::IAM::Role
