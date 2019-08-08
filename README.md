@@ -25,7 +25,7 @@ PUBLIC_SUBNETS=subnet-03ad595bb28ce7679,subnet-09f9df1d1d8a2c2c9 \
 
 ## Testing
 
-### Bandwidth
+I use the AWS System Manager Session Manager to SSH into an instance in a private subnet utilizing the NAT and run:
 
 ```
 yum install python python-pip -y \
