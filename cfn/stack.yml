@@ -92,7 +92,8 @@ Resources:
           - AMI
         InstanceType: t3.nano
         NetworkInterfaces:
-          - PrivateIpAddress: !Ref PrivateIP
+          - DeviceIndex: '0'
+            PrivateIpAddress: !Ref PrivateIP
             SubnetId:
               !Select
               - 0
