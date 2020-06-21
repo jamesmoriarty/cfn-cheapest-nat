@@ -83,12 +83,6 @@ Resources:
     Properties:
       PrivateIpAddress: !Ref PrivateIP
       SourceDestCheck: False
-      SubnetId:
-        !Select
-        - 0
-        - !Split
-          - ','
-          - !Ref PublicSubnets
 
   NATInstanceLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
