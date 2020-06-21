@@ -4,8 +4,11 @@ Parameters:
   PrivateRouteTables:
     Type: String
 
+  PrivateIP:
+    Type: String
+
   PublicSubnets:
-    Type: String 
+    Type: String
 
 Mappings:
   RegionMap:
@@ -15,20 +18,20 @@ Mappings:
 Resources:
   NATInstanceAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
-    Properties: 
-      VPCZoneIdentifier: 
-        !Split 
+    Properties:
+      VPCZoneIdentifier:
+        !Split
         - ','
         - !Ref PublicSubnets
       MixedInstancesPolicy:
-        InstancesDistribution: 
+        InstancesDistribution:
           OnDemandPercentageAboveBaseCapacity: 0
           SpotAllocationStrategy: lowest-price
-        LaunchTemplate: 
+        LaunchTemplate:
           LaunchTemplateSpecification:
             LaunchTemplateId: !Ref NATInstanceLaunchTemplate
             Version: !GetAtt NATInstanceLaunchTemplate.LatestVersionNumber
-          Overrides: 
+          Overrides:
           - InstanceType: t3a.nano
           - InstanceType: t3.nano
       MaxSize: '1'
@@ -70,17 +73,29 @@ Resources:
 
   NATInstanceProfile:
     Type: AWS::IAM::InstanceProfile
-    Properties: 
+    Properties:
       InstanceProfileName: !Join ['', [!Ref 'AWS::AccountId', '-', !Ref 'AWS::Region', '-', !Ref 'AWS::StackName']]
-      Roles: 
+      Roles:
       - !Ref NATInstanceRole
+
+  NATStaticNetworkInterface:
+    Type: AWS::EC2::NetworkInterface
+    Properties:
+      PrivateIpAddress: !Ref PrivateIP
+      SourceDestCheck: False
+      SubnetId:
+        !Select
+        - 0
+        - !Split
+          - ','
+          - !Ref PublicSubnets
 
   NATInstanceLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
       LaunchTemplateName: !Join ['', [!Ref 'AWS::AccountId', '-', !Ref 'AWS::Region', '-', !Ref 'AWS::StackName']]
       LaunchTemplateData:
-        IamInstanceProfile: 
+        IamInstanceProfile:
           Arn: !GetAtt NATInstanceProfile.Arn
         ImageId:
           Fn::FindInMap:
@@ -88,6 +103,9 @@ Resources:
           - !Ref 'AWS::Region'
           - AMI
         InstanceType: t3.nano
+        NetworkInterfaces:
+          - NetworkInterfaceId: !Ref NATStaticNetworkInterface
+            DeviceIndex: '0'
         UserData:
           'Fn::Base64': !Sub
           - |
@@ -95,10 +113,6 @@ Resources:
             trap '/opt/aws/bin/cfn-signal -e 1 --region ${Region} --stack ${StackName} --resource NATAutoScalingGroup' ERR
 
             INSTANCEID=$(curl -s -m 60 http://169.254.169.254/latest/meta-data/instance-id)
-
-            aws --region ${Region} ec2 modify-instance-attribute \
-              --instance-id $INSTANCEID \
-              --source-dest-check "{\"Value\": false}"
 
             IFS=$','
             tables=${PrivateRouteTables}
@@ -116,4 +130,3 @@ Resources:
           - PrivateRouteTables: !Ref PrivateRouteTables
             Region: !Ref 'AWS::Region'
             StackName: !Ref 'AWS::StackName'
-      
