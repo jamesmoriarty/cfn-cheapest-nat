@@ -78,12 +78,6 @@ Resources:
       Roles:
       - !Ref NATInstanceRole
 
-  NATStaticNetworkInterface:
-    Type: AWS::EC2::NetworkInterface
-    Properties:
-      PrivateIpAddress: !Ref PrivateIP
-      SourceDestCheck: False
-
   NATInstanceLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
@@ -98,8 +92,14 @@ Resources:
           - AMI
         InstanceType: t3.nano
         NetworkInterfaces:
-          - NetworkInterfaceId: !Ref NATStaticNetworkInterface
-            DeviceIndex: '0'
+          - PrivateIpAddress: !Ref PrivateIP
+            SourceDestCheck: False
+            SubnetId:
+              !Select
+              - 0
+              - !Split
+                - ','
+                - !Ref PublicSubnets
         UserData:
           'Fn::Base64': !Sub
           - |
