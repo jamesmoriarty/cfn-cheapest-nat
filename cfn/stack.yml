@@ -93,7 +93,6 @@ Resources:
         InstanceType: t3.nano
         NetworkInterfaces:
           - PrivateIpAddress: !Ref PrivateIP
-            SourceDestCheck: False
             SubnetId:
               !Select
               - 0
@@ -107,6 +106,10 @@ Resources:
             trap '/opt/aws/bin/cfn-signal -e 1 --region ${Region} --stack ${StackName} --resource NATAutoScalingGroup' ERR
 
             INSTANCEID=$(curl -s -m 60 http://169.254.169.254/latest/meta-data/instance-id)
+
+            aws --region ${Region} ec2 modify-instance-attribute \
+              --instance-id $INSTANCEID \
+              --source-dest-check "{\"Value\": false}"
 
             IFS=$','
             tables=${PrivateRouteTables}
