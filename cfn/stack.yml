@@ -105,7 +105,7 @@ Resources:
               --instance-id $INSTANCEID \
               --source-dest-check "{\"Value\": false}"
 
-            ENIID=$(aws --region ${Region} ec2 describe-network-interfaces --filter Name=attachment.instance-id,Values=$INSTANCEID --query 'NetworkInterfaces[0].NetworkInterfaceId')
+            ENIID=$(aws --region ${Region} ec2 describe-network-interfaces --filter Name=attachment.instance-id,Values=$INSTANCEID --query 'NetworkInterfaces[0].NetworkInterfaceId' --output text)
 
             aws --region ${Region} ec2 assign-private-ip-addresses \
               --allow-reassignment \
