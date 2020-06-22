@@ -12,5 +12,4 @@ aws cloudformation deploy \
   --stack-name $STACK_NAME \
   --parameter-overrides \
     PrivateRouteTables=$PRIVATE_ROUTE_TABLES \
-    PrivateIP=$PRIVATE_IP \
-    PublicSubnets=$PUBLIC_SUBNETS
+    PublicSubnet=$PUBLIC_SUBNET
