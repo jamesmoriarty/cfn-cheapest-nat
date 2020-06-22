@@ -5,30 +5,30 @@ Parameters:
     Type: String
 
   PublicSubnets:
-    Type: String 
+    Type: String
 
 Mappings:
   RegionMap:
     'ap-southeast-2':
-      AMI: 'ami-00c1445796bc0a29f'
+      AMI: 'ami-09dba131bcfb36a0c'
 
 Resources:
   NATInstanceAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
-    Properties: 
-      VPCZoneIdentifier: 
-        !Split 
+    Properties:
+      VPCZoneIdentifier:
+        !Split
         - ','
         - !Ref PublicSubnets
       MixedInstancesPolicy:
-        InstancesDistribution: 
+        InstancesDistribution:
           OnDemandPercentageAboveBaseCapacity: 0
           SpotAllocationStrategy: lowest-price
-        LaunchTemplate: 
+        LaunchTemplate:
           LaunchTemplateSpecification:
             LaunchTemplateId: !Ref NATInstanceLaunchTemplate
             Version: !GetAtt NATInstanceLaunchTemplate.LatestVersionNumber
-          Overrides: 
+          Overrides:
           - InstanceType: t3a.nano
           - InstanceType: t3.nano
       MaxSize: '1'
@@ -70,9 +70,9 @@ Resources:
 
   NATInstanceProfile:
     Type: AWS::IAM::InstanceProfile
-    Properties: 
+    Properties:
       InstanceProfileName: !Join ['', [!Ref 'AWS::AccountId', '-', !Ref 'AWS::Region', '-', !Ref 'AWS::StackName']]
-      Roles: 
+      Roles:
       - !Ref NATInstanceRole
 
   NATInstanceLaunchTemplate:
@@ -80,7 +80,7 @@ Resources:
     Properties:
       LaunchTemplateName: !Join ['', [!Ref 'AWS::AccountId', '-', !Ref 'AWS::Region', '-', !Ref 'AWS::StackName']]
       LaunchTemplateData:
-        IamInstanceProfile: 
+        IamInstanceProfile:
           Arn: !GetAtt NATInstanceProfile.Arn
         ImageId:
           Fn::FindInMap:
@@ -116,4 +116,3 @@ Resources:
           - PrivateRouteTables: !Ref PrivateRouteTables
             Region: !Ref 'AWS::Region'
             StackName: !Ref 'AWS::StackName'
-      
