@@ -5,7 +5,7 @@ env:
     STACK_NAME: examples-nat
     PRIVATE_ROUTE_TABLES: rtb-0eee90cf29e333813,rtb-0c1d060b614e74b88
     PRIVATE_IP: 10.192.10.58
-    PUBLIC_SUBNETS: subnet-03ad595bb28ce7679,subnet-09f9df1d1d8a2c2c9
+    PUBLIC_SUBNETS: subnet-03ad595bb28ce7679
 
 phases:
   install:
