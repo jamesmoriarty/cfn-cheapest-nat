@@ -110,7 +110,7 @@ Resources:
             aws --region ${Region} ec2 assign-private-ip-addresses \
               --allow-reassignment \
               --private-ip-addresses ${PrivateIP} \
-              --network-interface-id $ENIID \
+              --network-interface-id $ENIID
 
             IFS=$','
             tables=${PrivateRouteTables}
