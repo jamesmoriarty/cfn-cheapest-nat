@@ -68,7 +68,8 @@ Resources:
             - 'ec2:ModifyInstanceAttribute'
             - 'ec2:CreateRoute'
             - 'ec2:ReplaceRoute'
-            - 'ec2:AttachNetworkInterface'
+            - 'ec2:DescribeNetworkInterfaces'
+            - 'ec2:AssignPrivateIpAddresses'
             Resource:
             - '*'
 
@@ -78,18 +79,6 @@ Resources:
       InstanceProfileName: !Join ['', [!Ref 'AWS::AccountId', '-', !Ref 'AWS::Region', '-', !Ref 'AWS::StackName']]
       Roles:
       - !Ref NATInstanceRole
-
-  NATStaticNetworkInterface:
-    Type: AWS::EC2::NetworkInterface
-    Properties:
-      PrivateIpAddress: !Ref PrivateIP
-      SourceDestCheck: False
-      SubnetId:
-        !Select
-        - 0
-        - !Split
-          - ','
-          - !Ref PublicSubnets
 
   NATInstanceLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
@@ -116,10 +105,12 @@ Resources:
               --instance-id $INSTANCEID \
               --source-dest-check "{\"Value\": false}"
 
-            aws attach-network-interface \
-              --device-index 1 \
-              --instance-id $INSTANCEID \
-              --network-interface-id ${NATStaticNetworkInterface}
+            ENIID=$(aws --region ${Region} ec2 describe-network-interfaces --filter Name=attachment.instance-id,Values=$INSTANCEID --query 'NetworkInterfaces[0].NetworkInterfaceId')
+
+            aws --region ${Region} ec2 assign-private-ip-addresses \
+              --allow-reassignment \
+              --private-ip-addresses ${PrivateIP} \
+              --network-interface-id $ENIID \
 
             IFS=$','
             tables=${PrivateRouteTables}
@@ -137,4 +128,4 @@ Resources:
           - PrivateRouteTables: !Ref PrivateRouteTables
             Region: !Ref 'AWS::Region'
             StackName: !Ref 'AWS::StackName'
-            NATStaticNetworkInterface: !Ref NATStaticNetworkInterface
+            PrivateIP: !Ref PrivateIP
