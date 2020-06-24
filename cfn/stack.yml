@@ -112,10 +112,10 @@ Resources:
 
             sleep 5
 
-            iptables -A FORWARD -i eth1 -o eth0 -j ACCEPT
-            iptables -A FORWARD -i eth0 -o eth1 -m state --state ESTABLISHED,RELATED -j ACCEPT
-            iptables -t nat -C POSTROUTING -o eth1 -j MASQUERADE 2> /dev/null || iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE
+            iptables -t nat -A POSTROUTING --out-interface eth0 -j MASQUERADE
+            iptables -A FORWARD --in-interface eth1 -j ACCEPT
             iptables -L -n -v --line-numbers
+            iptables -t nat -L
 
             IFS=$','
             tables=${PrivateRouteTables}
