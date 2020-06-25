@@ -112,8 +112,17 @@ Resources:
 
             sleep 5
 
-            iptables -t nat -A POSTROUTING --out-interface eth0 -j MASQUERADE
-            iptables -A FORWARD --in-interface eth1 -j ACCEPT
+            iptables -F
+            iptables -t nat -F
+            iptables -t mangle -F
+
+            iptables -t nat -A POSTROUTING -o eth0 -s 10.192.0.0/16 -j MASQUERADE
+            iptables -t nat -A POSTROUTING -o eth1 -s 10.192.0.0/16 -j MASQUERADE
+
+            GW=$(ip route | grep default | awk '{print $3}' | head -n1)
+            ip route del default via $GW dev eth0
+            ip route flush cache
+
             iptables -L -n -v --line-numbers
             iptables -t nat -L
 
