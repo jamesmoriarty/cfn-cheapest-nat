@@ -4,7 +4,7 @@ Parameters:
   PrivateRouteTables:
     Type: String
 
-  PublicSubnets:
+  PublicSubnet:
     Type: String
 
 Mappings:
@@ -17,9 +17,7 @@ Resources:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
-        !Split
-        - ','
-        - !Ref PublicSubnets
+      - !Ref PublicSubnet
       MixedInstancesPolicy:
         InstancesDistribution:
           OnDemandPercentageAboveBaseCapacity: 0
@@ -65,8 +63,24 @@ Resources:
             - 'ec2:ModifyInstanceAttribute'
             - 'ec2:CreateRoute'
             - 'ec2:ReplaceRoute'
+            - "ec2:AttachNetworkInterface"
             Resource:
             - '*'
+
+  NATStaticNetworkInterface:
+    Type: AWS::EC2::NetworkInterface
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      SourceDestCheck: False
+
+  NATEIP:
+    Type: AWS::EC2::EIP
+
+  NATEIPAssociation:
+    Type: AWS::EC2::EIPAssociation
+    Properties:
+      NetworkInterfaceId: !Ref NATStaticNetworkInterface
+      AllocationId: !GetAtt NATEIP.AllocationId
 
   NATInstanceProfile:
     Type: AWS::IAM::InstanceProfile
@@ -100,19 +114,35 @@ Resources:
               --instance-id $INSTANCEID \
               --source-dest-check "{\"Value\": false}"
 
+            aws --region ${Region} ec2 attach-network-interface \
+                --device-index 1 \
+                --instance-id $INSTANCEID \
+                --network-interface-id ${NATStaticNetworkInterface}
+
+            while ! ip link show dev eth1; do
+              sleep 1
+            done
+
+            sysctl -q -w net.ipv4.ip_forward=1
+            sysctl -q -w net.ipv4.conf.eth1.send_redirects=0
+            iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE
+
+            ip route del default dev eth0
+
             IFS=$','
             tables=${PrivateRouteTables}
             for table in $tables; do
               aws --region ${Region} ec2 replace-route \
                 --route-table-id $table \
                 --destination-cidr-block "0.0.0.0/0" \
-                --instance-id $INSTANCEID || \
+                --network-interface-id ${NATStaticNetworkInterface} || \
                   aws --region ${Region} ec2 create-route \
-                  --route-table-id $table \
-                  --destination-cidr-block "0.0.0.0/0" \
-                  --instance-id $INSTANCEID
+                    --route-table-id $table \
+                    --destination-cidr-block "0.0.0.0/0" \
+                    --network-interface-id ${NATStaticNetworkInterface}
             done
             unset IFS
           - PrivateRouteTables: !Ref PrivateRouteTables
-            Region: !Ref 'AWS::Region'
-            StackName: !Ref 'AWS::StackName'
+            Region: !Ref "AWS::Region"
+            StackName: !Ref "AWS::StackName"
+            NATStaticNetworkInterface: !Ref NATStaticNetworkInterface
