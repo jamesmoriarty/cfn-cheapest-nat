@@ -54,6 +54,9 @@ Upload: 2274.26 Mbit/s
 
 ```
 cat /etc/sysctl.d/10-nat-settings.conf
+```
+
+```
 #
 # NAT AMI settings
 #
@@ -63,7 +66,10 @@ net.ipv4.conf.eth0.send_redirects = 0
 ```
 
 ```
-at /usr/sbin/configure-pat.sh
+cat /usr/sbin/configure-pat.sh
+```
+
+```
 #!/bin/bash
 # Configure the instance to run as a Port Address Translator (PAT) to provide
 # Internet connectivity to private instances.
