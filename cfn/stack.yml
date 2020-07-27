@@ -119,16 +119,24 @@ Resources:
                 --instance-id $INSTANCEID \
                 --network-interface-id ${NATStaticNetworkInterface}
 
+            # Wait for above eni to attach.
             while ! ip link show dev eth1; do
               sleep 1
             done
 
+            # Enable accepting incoming network packets.
             sysctl -q -w net.ipv4.ip_forward=1
+
+            # Disables sending IPv4 ICMP redirected packets.
             sysctl -q -w net.ipv4.conf.eth1.send_redirects=0
+
+            # Enabled Network Address Translation (NAT).
             iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE
 
+            # Remove default route to primary interface.
             ip route del default dev eth0
 
+            # Update private subnet route tables to point to eni.
             IFS=$','
             tables=${PrivateRouteTables}
             for table in $tables; do
