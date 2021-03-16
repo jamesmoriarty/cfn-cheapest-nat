@@ -4,6 +4,10 @@
 
 The never ending quest to find the cheapest AWS VPC NAT solution for personal projects.
 
+## Logical Diagramss
+
+![Logical Diagram](/docs/logical.drawio.svg)
+
 ## Deploy
 
 ```
