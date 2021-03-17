@@ -4,6 +4,15 @@
 
 The never ending quest to find the cheapest AWS VPC NAT solution for personal projects.
 
+The current solutions *is*:
+
+- EC2 running on Spot.
+- Auto Healing e.g. Autoscaling Group, persistent Network Interface
+
+The solution is *not*:
+- Highly Available e.g. single instance 
+- Fault Tolerant e.g. one zone
+
 ## Logical Diagram
 
 ![Logical Diagram](/docs/logical.drawio.svg)
@@ -62,7 +71,5 @@ Upload: 2274.26 Mbit/s
 
 ### Configuration
 
-```
-/etc/sysctl.d/10-nat-settings.conf
-/usr/sbin/configure-pat.sh
-```
+- /etc/sysctl.d/10-nat-settings.conf
+- /usr/sbin/configure-pat.sh
