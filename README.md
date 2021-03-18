@@ -16,7 +16,7 @@ The current solutions *is*:
 The solution is *not*:
 
 - Highly Available
-  - if cycled, will cause NAT disruption.
+  - instance unavailability will cause NAT disruption.
 - Fault Tolerant
   - the persistent network interface results in dependency on a single zone.
 
