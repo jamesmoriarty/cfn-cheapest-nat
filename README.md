@@ -4,14 +4,21 @@
 
 The never ending quest to find the cheapest AWS VPC NAT solution for personal projects.
 
+## Context
+
 The current solutions *is*:
 
 - EC2 running on Spot.
-- Auto Healing e.g. Autoscaling Group, persistent Network Interface
+- Auto Healing 
+  - automatically replaces the unhealthy instance.
+  - re-attaches a persistent network interface to recover transport level details such as routes.
 
 The solution is *not*:
-- Highly Available e.g. single instance 
-- Fault Tolerant e.g. one zone
+
+- Highly Available
+  - if cycled, will cause NAT disruption.
+- Fault Tolerant
+  - the persistent network interface results in dependency on a single zone.
 
 ## Logical Diagram
 
