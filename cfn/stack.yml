@@ -9,7 +9,7 @@ Parameters:
 
   LatestAmiId:
     Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
-    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
+    Default: '/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64'
 
 Resources:
   NATInstanceAutoScalingGroup:
@@ -101,9 +101,16 @@ Resources:
           'Fn::Base64': !Sub
           - |
             #!/bin/bash -ex
-            trap '/opt/aws/bin/cfn-signal -e 1 --region ${Region} --stack ${StackName} --resource NATAutoScalingGroup' ERR
+
+            # AL2023 uses dnf and runs iptables on the nftables backend;
+            # ensure the iptables command is present.
+            dnf install -y iptables
 
             INSTANCEID=$(curl -s -m 60 http://169.254.169.254/latest/meta-data/instance-id)
+
+            # Capture the primary interface before attaching the NAT ENI.
+            # AL2023 uses predictable names (e.g. ens5) rather than eth0/eth1.
+            PRIMARY_IF=$(ip route show default | awk '{print $5; exit}')
 
             aws --region ${Region} ec2 modify-instance-attribute \
               --instance-id $INSTANCEID \
@@ -114,22 +121,25 @@ Resources:
                 --instance-id $INSTANCEID \
                 --network-interface-id ${NATStaticNetworkInterface}
 
-            # Wait for above eni to attach.
-            while ! ip link show dev eth1; do
+            # Wait for the second ENI to appear and identify it by exclusion.
+            NAT_IF=""
+            while [ -z "$NAT_IF" ]; do
+              NAT_IF=$(ls /sys/class/net | grep -vxe lo -e "$PRIMARY_IF" | head -n1)
               sleep 1
             done
+            ip link set dev "$NAT_IF" up
 
             # Enable accepting incoming network packets.
             sysctl -q -w net.ipv4.ip_forward=1
 
             # Disables sending IPv4 ICMP redirected packets.
-            sysctl -q -w net.ipv4.conf.eth1.send_redirects=0
+            sysctl -q -w net.ipv4.conf.$NAT_IF.send_redirects=0
 
             # Enabled Network Address Translation (NAT).
-            iptables -t nat -A POSTROUTING -o eth1 -j MASQUERADE
+            iptables -t nat -A POSTROUTING -o "$NAT_IF" -j MASQUERADE
 
             # Remove default route to primary interface.
-            ip route del default dev eth0
+            ip route del default dev "$PRIMARY_IF"
 
             # Update private subnet route tables to point to eni.
             IFS=$','
@@ -147,5 +157,4 @@ Resources:
             unset IFS
           - PrivateRouteTables: !Ref PrivateRouteTables
             Region: !Ref "AWS::Region"
-            StackName: !Ref "AWS::StackName"
             NATStaticNetworkInterface: !Ref NATStaticNetworkInterface
