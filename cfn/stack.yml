@@ -102,7 +102,9 @@ Resources:
           - |
             #!/bin/bash -ex
 
-            INSTANCEID=$(curl -s -m 60 http://169.254.169.254/latest/meta-data/instance-id)
+            # AL2023 enforces IMDSv2, so fetch a session token before querying.
+            TOKEN=$(curl -s -m 60 -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+            INSTANCEID=$(curl -s -m 60 -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id)
 
             # Capture the primary interface before attaching the NAT ENI.
             # AL2023 uses predictable names (e.g. ens5) rather than eth0/eth1.
