@@ -102,10 +102,6 @@ Resources:
           - |
             #!/bin/bash -ex
 
-            # AL2023 uses dnf and runs iptables on the nftables backend;
-            # ensure the iptables command is present.
-            dnf install -y iptables
-
             INSTANCEID=$(curl -s -m 60 http://169.254.169.254/latest/meta-data/instance-id)
 
             # Capture the primary interface before attaching the NAT ENI.
@@ -135,8 +131,16 @@ Resources:
             # Disables sending IPv4 ICMP redirected packets.
             sysctl -q -w net.ipv4.conf.$NAT_IF.send_redirects=0
 
-            # Enabled Network Address Translation (NAT).
-            iptables -t nat -A POSTROUTING -o "$NAT_IF" -j MASQUERADE
+            # Enabled Network Address Translation (NAT). AL2023 ships
+            # nftables; use iptables if present, otherwise nft directly.
+            # Avoids installing packages at boot (dnf OOMs on t3a.nano).
+            if command -v iptables >/dev/null; then
+              iptables -t nat -A POSTROUTING -o "$NAT_IF" -j MASQUERADE
+            else
+              nft add table ip nat
+              nft add chain ip nat postrouting '{ type nat hook postrouting priority 100 ; }'
+              nft add rule ip nat postrouting oifname "$NAT_IF" masquerade
+            fi
 
             # Remove default route to primary interface.
             ip route del default dev "$PRIMARY_IF"
