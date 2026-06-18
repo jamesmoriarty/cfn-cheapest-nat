@@ -133,16 +133,22 @@ Resources:
             # Disables sending IPv4 ICMP redirected packets.
             sysctl -q -w net.ipv4.conf.$NAT_IF.send_redirects=0
 
-            # Enabled Network Address Translation (NAT). AL2023 ships
-            # nftables; use iptables if present, otherwise nft directly.
-            # Avoids installing packages at boot (dnf OOMs on t3a.nano).
-            if command -v iptables >/dev/null; then
-              iptables -t nat -A POSTROUTING -o "$NAT_IF" -j MASQUERADE
-            else
-              nft add table ip nat
-              nft add chain ip nat postrouting '{ type nat hook postrouting priority 100 ; }'
-              nft add rule ip nat postrouting oifname "$NAT_IF" masquerade
+            # The minimal AL2023 AMI ships neither iptables nor nft, so we
+            # must install iptables for the masquerade rule. On a 512 MB
+            # t3a.nano dnf can OOM alongside the SSM Agent self-update (zram
+            # swap alone was not enough), so add a disk-backed swap file
+            # first. This runs while $PRIMARY_IF still has its default route,
+            # before it is removed below.
+            if [ ! -f /swapfile ]; then
+              dd if=/dev/zero of=/swapfile bs=1M count=1024
+              chmod 600 /swapfile
+              mkswap /swapfile
+              swapon /swapfile
             fi
+            dnf install -y iptables
+
+            # Enabled Network Address Translation (NAT).
+            iptables -t nat -A POSTROUTING -o "$NAT_IF" -j MASQUERADE
 
             # Remove default route to primary interface.
             ip route del default dev "$PRIMARY_IF"
