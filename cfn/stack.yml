@@ -7,10 +7,9 @@ Parameters:
   PublicSubnet:
     Type: String
 
-Mappings:
-  RegionMap:
-    'ap-southeast-2':
-      AMI: 'ami-09dba131bcfb36a0c'
+  LatestAmiId:
+    Type: 'AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>'
+    Default: '/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2'
 
 Resources:
   NATInstanceAutoScalingGroup:
@@ -96,11 +95,7 @@ Resources:
       LaunchTemplateData:
         IamInstanceProfile:
           Arn: !GetAtt NATInstanceProfile.Arn
-        ImageId:
-          Fn::FindInMap:
-          - RegionMap
-          - !Ref 'AWS::Region'
-          - AMI
+        ImageId: !Ref LatestAmiId
         InstanceType: t3.nano
         UserData:
           'Fn::Base64': !Sub
